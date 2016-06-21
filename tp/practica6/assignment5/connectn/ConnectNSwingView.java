@@ -1,13 +1,18 @@
 package es.ucm.fdi.tp.assignment5.connectn;
 
+import java.util.List;
+
 import es.ucm.fdi.tp.assignment5.RectBoardSwingView;
-import es.ucm.fdi.tp.assignment6.swingplayers.ConnectNSwingPlayer;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
+import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
+import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
+import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.basecode.connectn.ConnectNMove;
 
 public class ConnectNSwingView extends RectBoardSwingView {
 
@@ -28,8 +33,6 @@ public class ConnectNSwingView extends RectBoardSwingView {
 	public void selectedCoordinates(int row, int col) {
 		// TODO Auto-generated method stub
 		try {
-			ctrl.makeMove(new ConnectNSwingPlayer(row, col, getTurn()));
-			/*
 			ctrl.makeMove(new Player() {
 
 				private static final long serialVersionUID = 1L;
@@ -40,7 +43,6 @@ public class ConnectNSwingView extends RectBoardSwingView {
 				}
 
 			});
-			*/
 		} catch (GameError e) {
 		} catch (Exception e) {
 		}

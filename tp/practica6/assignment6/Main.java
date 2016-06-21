@@ -1,9 +1,34 @@
+/*
+ * TP-Board-Games
+ * 
+ * Developed by DEVmorticus215
+ * Contact: Marta Pastor Puente (martapastorpuente@gmail.com)
+ * Github: DEVmorticus215
+ */
+
 package es.ucm.fdi.tp.assignment6;
+
+//Needed for selectGameOptions() method
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
+
+// Needed for selectGameOptions() method
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -44,7 +69,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.Piece;
  * {@link https://commons.apache.org/proper/commons-cli/} .
  */
 public class Main {
-	// Locale.setDefault(new Locale("en", "EN"));
 
 	enum AppMode {
 		NORMAL("normal", "n"), CLIENT("client", "c"), SERVER("server", "s");
@@ -168,7 +192,7 @@ public class Main {
 	 * <p>
 	 * Juego por defecto.
 	 */
-	final private static GameInfo DEFAULT_GAME = GameInfo.Ataxx;
+	final private static GameInfo DEFAULT_GAME = GameInfo.CONNECTN;
 
 	/**
 	 * Default view to use.
@@ -585,7 +609,11 @@ public class Main {
 					gameFactory = new AtaxxFactoryExt(dimRows, 0);
 				}
 			} else {
-				gameFactory = new AtaxxFactoryExt();
+				if (obstacles != null) {
+					gameFactory = new AtaxxFactoryExt(7, obstacles);
+				} else {
+					gameFactory = new AtaxxFactoryExt();
+				}
 			}
 			break;
 		case AdvancedTicTacToe:
@@ -916,6 +944,228 @@ public class Main {
 		}
 	}
 
+	/*
+	 * GUI FOR GAME OPTIONS SELECTION (optional) Developed by DEVmorticus215
+	 * 
+	 * This method shows a GUI that allows us to choose game options as number
+	 * of players, the tipe of game or the dimension of the board without having
+	 * to use the command line (this has been implemented in order to be able to
+	 * choose game options in Mac OS, which do not have JDK installed, when
+	 * running the .jar)
+	 * 
+	 * To have this game options GUI working properly, we have to comment the
+	 * invokeAndWait methods in <Game<FactoryExt.java classes and discomment the
+	 * last line of code in said classes.
+	 */
+	public static void selectGameOptions() {
+
+		JFrame gameOptionsFrame = new JFrame();
+		gameOptionsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gameOptionsFrame.setSize(620, 480);
+		gameOptionsFrame.setTitle("Game options selector");
+
+		ImageIcon icon = new ImageIcon("C:\\hlocal\\Eclipse Neon\\Pr6\\src\\es\\ucm\\fdi\\tp\\assignment6\\icon.png");
+		gameOptionsFrame.setIconImage(icon.getImage());
+
+		JPanel window = new JPanel();
+
+		JPanel selectDimensionPanel = new JPanel();
+		selectDimensionPanel.setPreferredSize(new Dimension(600, 60));
+		// selectDimensionPanel.setLocation(0, 200);
+		selectDimensionPanel.setBorder(BorderFactory.createTitledBorder("1º - Dimension (only for Connect N & Ataxx)"));
+
+		JTextField dimTextBox = new JTextField();
+		dimTextBox.setPreferredSize(new Dimension(80, 30));
+		selectDimensionPanel.add(dimTextBox, BorderLayout.CENTER);
+
+		JButton setDimButton = new JButton("Set dimension");
+		setDimButton.setSize(80, 30);
+		setDimButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!dimTextBox.getText().isEmpty()) {
+					dimRows = Integer.parseInt(dimTextBox.getText());
+				}
+			}
+		});
+		selectDimensionPanel.add(setDimButton);
+
+		selectDimensionPanel.setVisible(true);
+		window.add(selectDimensionPanel, BorderLayout.CENTER);
+
+		JPanel selectObsPanel = new JPanel();
+		selectObsPanel.setPreferredSize(new Dimension(600, 60));
+		// selectDimensionPanel.setLocation(0, 200);
+		selectObsPanel.setBorder(BorderFactory.createTitledBorder("2º - # Obstacles (only for Ataxx)"));
+
+		JTextField obsTextBox = new JTextField();
+		obsTextBox.setPreferredSize(new Dimension(80, 30));
+		selectObsPanel.add(obsTextBox, BorderLayout.CENTER);
+
+		JButton setObsButton = new JButton("Set obstacles");
+		setObsButton.setSize(80, 30);
+		setObsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!obsTextBox.getText().isEmpty()) {
+					obstacles = Integer.parseInt(obsTextBox.getText());
+				}
+			}
+		});
+		selectObsPanel.add(setObsButton);
+
+		selectObsPanel.setVisible(true);
+		window.add(selectObsPanel, BorderLayout.CENTER);
+
+		JPanel selectPlayersPanel = new JPanel();
+		selectPlayersPanel.setPreferredSize(new Dimension(600, 200)); //
+		selectPlayersPanel.setLocation(0, 400);
+		selectPlayersPanel.setBorder(BorderFactory.createTitledBorder("3º - Players"));
+
+		JLabel playersInfo = new JLabel();
+		playersInfo.setPreferredSize(new Dimension(580, 60));
+		playersInfo.setText("Please, introduce the name of players separated by commas (,)");
+		playersInfo.setVisible(true);
+		selectPlayersPanel.add(playersInfo);
+
+		JTextArea players = new JTextArea();
+		players.setPreferredSize(new Dimension(580, 60));
+
+		players.setVisible(true);
+		selectPlayersPanel.add(players);
+
+		JButton addPlayerButton = new JButton("Add players");
+		addPlayerButton.setSize(80, 30);
+		addPlayerButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String getPlayers = players.getText();
+				String[] playersArray = getPlayers.replaceAll(" ", "").split(",");
+
+				if (playersArray.length > 0) {
+					pieces.clear();
+
+					for (int i = 0; i < playersArray.length; i++) {
+						Piece p = new Piece(playersArray[i]);
+						pieces.add(p);
+						playerModes.add(DEFAULT_PLAYERMODE);
+					}
+				}
+			}
+		});
+		selectPlayersPanel.add(addPlayerButton);
+
+		selectPlayersPanel.setVisible(true);
+		window.add(selectPlayersPanel, BorderLayout.CENTER);
+
+		JPanel selectGamePanel = new JPanel();
+		selectGamePanel.setPreferredSize(new Dimension(600, 60));
+		// selectGamePanel.setLocation(0, 0);
+		selectGamePanel.setBorder(BorderFactory.createTitledBorder("4º - Games"));
+
+		JButton connectNButton = new JButton("Connect N");
+		connectNButton.setSize(80, 30);
+		connectNButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (dimRows != null && dimRows % 2 == 1) {
+					gameFactory = new ConnectNFactoryExt(dimRows);
+				} else {
+					gameFactory = new ConnectNFactoryExt();
+				}
+			}
+		});
+		selectGamePanel.add(connectNButton);
+
+		JButton tttButton = new JButton("Tic-Tac-Toe");
+		tttButton.setSize(80, 30);
+		tttButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gameFactory = new TicTacToeFactoryExt();
+			}
+		});
+		selectGamePanel.add(tttButton);
+
+		JButton atttButton = new JButton("Advanced Tic-Tac-Toe");
+		atttButton.setSize(80, 30);
+		atttButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gameFactory = new AdvancedTTTFactoryExt();
+			}
+		});
+		selectGamePanel.add(atttButton);
+
+		JButton ataxxButton = new JButton("Ataxx");
+		ataxxButton.setSize(80, 30);
+		ataxxButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (dimRows % 2 != 1) {
+					dimRows = null;
+				}
+
+				if (dimRows != null && obstacles != null) {
+					gameFactory = new AtaxxFactoryExt(dimRows, obstacles);
+				} else if (dimRows == null && obstacles != null) {
+					gameFactory = new AtaxxFactoryExt(7, obstacles);
+				} else if (dimRows != null && obstacles == null) {
+					gameFactory = new AtaxxFactoryExt(dimRows, 0);
+				} else {
+					gameFactory = new AtaxxFactoryExt();
+				}
+			}
+		});
+		selectGamePanel.add(ataxxButton);
+
+		selectGamePanel.setVisible(true);
+		window.add(selectGamePanel, BorderLayout.CENTER);
+
+		JPanel startGamePanel = new JPanel();
+		startGamePanel.setPreferredSize(new Dimension(600, 60));
+		// startGamePanel.setLocation(0, 400);
+		// startGamePanel.setBorder(BorderFactory.createTitledBorder("Start
+		// game"));
+
+		JButton startGameButton = new JButton("Start game");
+		startGameButton.setSize(80, 30);
+		startGameButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				switch (applicationMode) {
+				case NORMAL:
+					startGame();
+					break;
+				case CLIENT:
+					startClient();
+					break;
+				case SERVER:
+					startServer();
+					break;
+				}
+
+				gameOptionsFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				gameOptionsFrame.setVisible(false);
+				gameOptionsFrame.dispose();
+			}
+
+		});
+		startGamePanel.add(startGameButton);
+
+		startGamePanel.setVisible(true);
+		window.add(startGamePanel, BorderLayout.CENTER);
+
+		window.setVisible(true);
+
+		gameOptionsFrame.setLocationRelativeTo(null);
+		gameOptionsFrame.setContentPane(window);
+		gameOptionsFrame.setVisible(true);
+
+	}
+
 	/**
 	 * The main method. It calls {@link #parseArgs(String[])} and then
 	 * {@link #startGame()}.
@@ -927,9 +1177,16 @@ public class Main {
 	 *            Command-line arguments.
 	 * 
 	 */
+
 	public static void main(String[] args) {
+		Locale.setDefault(new Locale("en", "EN"));
+
 		parseArgs(args);
-		
+
+		// In order to use GUI game options selector, discomment the next part
+		// and comment the swith(applicationMode) code:
+		// selectGameOptions();
+
 		switch (applicationMode) {
 		case NORMAL:
 			startGame();
@@ -941,6 +1198,7 @@ public class Main {
 			startServer();
 			break;
 		}
+
 	}
 
 }

@@ -1,11 +1,16 @@
 package es.ucm.fdi.tp.assignment5.attt;
 
+import java.util.List;
+
 import es.ucm.fdi.tp.assignment5.RectBoardSwingView;
-import es.ucm.fdi.tp.assignment6.swingplayers.AdvancedTTTSwingPlayer;
+import es.ucm.fdi.tp.basecode.attt.AdvancedTTTMove;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
+import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
+import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
+import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 
@@ -32,9 +37,7 @@ public class AdvancedTTTSwingView extends RectBoardSwingView {
 		if (getBoard().getPieceCount(getTurn()) > 0) {
 			// Connect N move
 			try {
-				ctrl.makeMove(new AdvancedTTTSwingPlayer(-1, -1, row, col, getTurn()));
-				/*
-				 ctrl.makeMove(new Player() {
+				ctrl.makeMove(new Player() {
 
 					private static final long serialVersionUID = 1L;
 
@@ -44,7 +47,6 @@ public class AdvancedTTTSwingView extends RectBoardSwingView {
 					}
 
 				});
-				*/
 			} catch (GameError e) {
 			} catch (Exception e) {
 			}
@@ -53,8 +55,6 @@ public class AdvancedTTTSwingView extends RectBoardSwingView {
 			if (isSecondSelection) {
 				isSecondSelection = false;
 				try {
-					ctrl.makeMove(new AdvancedTTTSwingPlayer(firstRow, firstCol, row, col, getTurn()));
-					/*
 					ctrl.makeMove(new Player() {
 
 						private static final long serialVersionUID = 1L;
@@ -64,7 +64,6 @@ public class AdvancedTTTSwingView extends RectBoardSwingView {
 							return new AdvancedTTTMove(firstRow, firstCol, row, col, getTurn());
 						}
 					});
-					*/
 				} catch (GameError e) {
 				} catch (Exception e) {
 				}

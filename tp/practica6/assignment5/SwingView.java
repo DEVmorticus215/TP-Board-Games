@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -60,6 +61,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	private MyTableModel tModel;
 
 	public SwingView(Observable<GameObserver> g, Controller c, Piece localPiece, Player randPlayer, Player aiPlayer) {
+
 		ctrl = c;
 		this.localPiece = localPiece;
 		this.randPlayer = randPlayer;
@@ -72,6 +74,9 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	}
 
 	private void initGUI() {
+		ImageIcon icon = new ImageIcon("C:\\hlocal\\Eclipse Neon\\Pr6\\src\\es\\ucm\\fdi\\tp\\assignment6\\icon.png");
+		this.setIconImage(icon.getImage());
+
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(900, 620);
 		JPanel window = new JPanel(new BorderLayout());
@@ -128,6 +133,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			public void actionPerformed(ActionEvent e) {
 				Piece piece = playerComboBox.getItemAt(playerComboBox.getSelectedIndex());
 				ColorChooser colorChooser = new ColorChooser(null, "Choose a color", getPieceColor(piece));
+
 				if (piece.equals(localPiece) || localPiece == null) {
 					if (colorChooser.getColor() != null) {
 						setPieceColor(piece, colorChooser.getColor());
@@ -166,11 +172,15 @@ public abstract class SwingView extends JFrame implements GameObserver {
 					} else if (playerMode.equals(PlayerMode.AI.getDesc())) {
 						playerTypes.put(piece, PlayerMode.AI);
 						tModel.setMode(piece, PlayerMode.AI);
-						ctrl.makeMove(aiPlayer);
+						if (piece.equals(turn)) {
+							ctrl.makeMove(aiPlayer);
+						}
 					} else if (playerMode.equals(PlayerMode.RANDOM.getDesc())) {
 						playerTypes.put(piece, PlayerMode.RANDOM);
 						tModel.setMode(piece, PlayerMode.RANDOM);
-						decideMakeAutomaticMove();
+						if (piece.equals(turn)) {
+							decideMakeAutomaticMove();
+						}
 					}
 				} else {
 					addMsg("You cannot change other players piece's mode.");
@@ -209,7 +219,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			intelligentButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
+
 					Piece piece = playerComboBox.getItemAt(playerComboBox.getSelectedIndex());
 					if (piece.equals(localPiece) || localPiece == null) {
 						try {
@@ -238,7 +248,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				int n = JOptionPane.showConfirmDialog(null, "Are you sure?", "Quit", JOptionPane.YES_NO_OPTION,
+				int n = JOptionPane.showConfirmDialog(null, "Are you sure?", "Confirm exit", JOptionPane.YES_NO_OPTION,
 						JOptionPane.QUESTION_MESSAGE);
 
 				if (n == 0) {
@@ -265,6 +275,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		lateralPanel.add(quitAndRestartPanel, BorderLayout.CENTER);
 
 		initBoardGui();
+		this.setLocationRelativeTo(null);
 		this.setContentPane(window);
 		this.setVisible(true);
 	}
@@ -338,6 +349,29 @@ public abstract class SwingView extends JFrame implements GameObserver {
 					tModel.setNumberPiece(piece, receivedBoard.getPieceCount(piece));
 					tModel.setMode(piece, PlayerMode.MANUAL);
 				}
+
+				//
+
+				if (gameDesc.contains("Ataxx")) {
+					int cont = 0;
+					Piece obs = null;
+
+					do {
+						obs = new Piece("*#" + cont);
+						cont++;
+					} while (pieces.contains(obs));
+
+					for (Piece p : receivedPieces) {
+						for (int i = 0; i < receivedBoard.getRows(); i++) {
+							for (int j = 0; j < receivedBoard.getCols(); j++) {
+								if (!p.equals(receivedBoard.getPosition(i, j))) {
+									setPieceColor(obs, new Color(0xFDB225));
+								}
+							}
+						}
+					}
+				}
+
 				redrawBoard();
 
 				if (localPiece != null) {
@@ -349,6 +383,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 						addMsg("Turn for you, " + receivedTurn);
 					}
 				} else {
+					activateBoard();
 					addMsg("Turn for " + receivedTurn);
 				}
 			}
@@ -359,11 +394,12 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	public void onGameOver(Board receivedBoard, State state, Piece winner) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				turn = winner;
 				board = receivedBoard;
+
 				redrawBoard();
+
 				if (state == State.Won) {
-					addMsg(turn + " is the winner!");
+					addMsg(winner + " is the winner!");
 				} else if (state == State.Draw) {
 					addMsg("The game ended in a draw.");
 				} else if (state == State.Stopped) {
@@ -406,9 +442,12 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				} else if (playerTypes.get(receivedTurn).equals(PlayerMode.MANUAL)) {
 					//
 				}
+
 				for (Piece piece : getPieces()) {
 					tModel.setNumberPiece(piece, receivedBoard.getPieceCount(piece));
 				}
+
+				redrawBoard();
 
 				if (localPiece != null) {
 					if (!localPiece.equals(receivedTurn)) {
@@ -422,7 +461,6 @@ public abstract class SwingView extends JFrame implements GameObserver {
 					activateBoard();
 					addMsg("Turn for " + receivedTurn);
 				}
-				redrawBoard();
 			}
 		});
 	}
@@ -514,10 +552,13 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	public static Iterator<Color> niceColorsGenerator() {
 
 		Iterator<Color> i = new Iterator<Color>() {
-			// since we use a fixed seed, we always get the same sequence of
-			// colors
-			//
-			private Random r = new Random(208);
+			// Since we use a fixed seed, we always get the same sequence of
+			// colors. However, although this method is exactly the same as the
+			// colorsGenerator method in class Utils.java (basecode.bgame
+			// package), the seed has been modified so it generates colors I
+			// think are nice for the game (not as the green and brown generated
+			// by the seed of the basecode)
+			private Random r = new Random(1872);
 
 			@Override
 			public Color next() {

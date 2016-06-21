@@ -18,9 +18,10 @@ public class Connection {
 	}
 	
 	public void sendObject(Object o) throws IOException{
+		out.reset();
+		
 		out.writeObject(o);
 		out.flush();
-		out.reset();
 	}
 	
 	public Object getObject() throws ClassNotFoundException, IOException{

@@ -2,6 +2,7 @@ package es.ucm.fdi.tp.assignment5;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -40,7 +41,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.Piece;
  * {@link https://commons.apache.org/proper/commons-cli/} .
  */
 public class Main {
-	// Locale.setDefault(new Locale("en", "EN"));
 	
 	/**
 	 * The possible views.
@@ -139,14 +139,14 @@ public class Main {
 	 * <p>
 	 * Juego por defecto.
 	 */
-	final private static GameInfo DEFAULT_GAME = GameInfo.Ataxx;
+	final private static GameInfo DEFAULT_GAME = GameInfo.CONNECTN;
 
 	/**
 	 * Default view to use.
 	 * <p>
 	 * Vista por defecto.
 	 */
-	final private static ViewInfo DEFAULT_VIEW = ViewInfo.CONSOLE;
+	final private static ViewInfo DEFAULT_VIEW = ViewInfo.WINDOW;
 
 	/**
 	 * Default player mode to use.
@@ -746,6 +746,7 @@ public class Main {
 			c = new ConsoleCtrlMVC(g, pieces, players, new Scanner(System.in));
 			gameFactory.createConsoleView(g, c);
 			break;
+			
 		case WINDOW:
 		    ArrayList<Player> playersWindow = new ArrayList<Player>();
             for (int i = 0; i < pieces.size(); i++) {
@@ -779,6 +780,7 @@ public class Main {
             }
             //throw new UnsupportedOperationException("Swing " + (multiviews ? "Multiviews" : "Views") + " are not supported yet! ");
             break;
+            
 		default:
 			throw new UnsupportedOperationException("Something went wrong! This program point should be unreachable!");
 		}
@@ -802,6 +804,9 @@ public class Main {
 	 * 
 	 */
 	public static void main(String[] args) {
+		// System.setProperty("apple.awt.UIElement", "true");
+		Locale.setDefault(new Locale("en", "EN"));
+		
 		parseArgs(args);
 		startGame();
 	}

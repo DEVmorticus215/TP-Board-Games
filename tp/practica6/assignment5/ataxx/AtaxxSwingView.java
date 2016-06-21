@@ -1,11 +1,16 @@
 package es.ucm.fdi.tp.assignment5.ataxx;
 
+import java.util.List;
+
+import es.ucm.fdi.tp.assignment4.ataxx.AtaxxMove;
 import es.ucm.fdi.tp.assignment5.RectBoardSwingView;
-import es.ucm.fdi.tp.assignment6.swingplayers.AtaxxSwingPlayer;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
+import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
+import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
+import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 
@@ -19,7 +24,6 @@ public class AtaxxSwingView extends RectBoardSwingView {
 	public AtaxxSwingView(Observable<GameObserver> g, Controller c, Piece localPiece, Player randPlayer,
 			Player aiPlayer) {
 		super(g, c, localPiece, randPlayer, aiPlayer);
-		// TODO Auto-generated constructor stub
 		isSecondSelection = false;
 		this.ctrl = c;
 		String title = "Ataxx";
@@ -30,12 +34,9 @@ public class AtaxxSwingView extends RectBoardSwingView {
 
 	@Override
 	public void selectedCoordinates(final int row, final int col) {
-		// TODO Auto-generated method stub
 		if (isSecondSelection) {
 			isSecondSelection = false;
 			try {
-				ctrl.makeMove(new AtaxxSwingPlayer(firstRow, firstCol, row, col, getTurn()));
-				/*
 				ctrl.makeMove(new Player() {
 
 					private static final long serialVersionUID = 1L;
@@ -45,7 +46,6 @@ public class AtaxxSwingView extends RectBoardSwingView {
 						return new AtaxxMove(firstRow, firstCol, row, col, getTurn());
 					}
 				});
-				*/
 			} catch (GameError e) {
 			} catch (Exception e) {
 			}

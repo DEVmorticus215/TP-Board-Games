@@ -1,5 +1,9 @@
 package es.ucm.fdi.tp.assignment5.ttt;
 
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
@@ -12,7 +16,27 @@ public class TicTacToeFactoryExt extends TicTacToeFactory {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-    public void createSwingView(final Observable<GameObserver> g, final Controller c, final Piece viewPiece, Player random, Player ai) {
-        new TicTacToeSwingView(g, c, viewPiece, random, ai);
-    }
+	public void createSwingView(final Observable<GameObserver> g, final Controller c, final Piece viewPiece,
+			Player random, Player ai) {
+
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					new TicTacToeSwingView(g, c, viewPiece, random, ai);
+				}
+
+			});
+		} catch (InvocationTargetException e) {
+		} catch (InterruptedException e) {
+		}
+
+		/*
+		 * To have the game options GUI of Main.class working properly, we have
+		 * to comment the invokeAndWait method above this comment lines and
+		 * discomment the following line of code:
+		 */
+		// new TicTacToeSwingView(g, c, viewPiece, random, ai);
+	}
 }

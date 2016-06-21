@@ -47,8 +47,7 @@ public class GameServer extends Controller implements GameObserver {
 	private int numOfConnectedPlayers;
 	private GameFactory gameFactory;
 	private List<Connection> clients;
-	// private Board board;
-	private boolean firstGame = true;
+	private boolean firstGame = true; //
 
 	volatile private ServerSocket server;
 	volatile private boolean stopped;
@@ -99,7 +98,9 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			startServer();
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.err.println("There's already a server running");
+			System.exit(1);
 		}
 	}
 
@@ -134,24 +135,10 @@ public class GameServer extends Controller implements GameObserver {
 		JButton quitButton = new JButton("Stop server");
 		quitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				gameOver = true;
-				game.stop();
-				log("The game has finished.");
-				
-				/*
-				// Stops the server and exits the app
-				for (Connection c : clients) {
-					try {
-						c.stop();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
 				stopped = true;
-				stop();
+				stopGame();
 				System.exit(0);
-				*/
+				
 			}
 		});
 		window.setLayout(new BorderLayout());
@@ -227,7 +214,7 @@ public class GameServer extends Controller implements GameObserver {
 			// restart()
 			if (numOfConnectedPlayers == numPlayers) {
 				log("The minimun number of players needed has been reached. The game is about to start...");
-				if (firstGame == true) {
+				if (firstGame) {
 					super.start();
 					firstGame = false;
 				} else {
@@ -250,7 +237,6 @@ public class GameServer extends Controller implements GameObserver {
 									// while the game is not over and the server
 									// has not been stopped
 
-			@SuppressWarnings("deprecation")
 			public void run() {
 				while (!stopped && !gameOver) {
 					try {
@@ -266,7 +252,7 @@ public class GameServer extends Controller implements GameObserver {
 					} catch (ClassNotFoundException | IOException e) {
 						if (!stopped && !gameOver) {
 							// Stops the game (not the server);
-							stop();
+							stopGame();
 						}
 					}
 				}
@@ -280,7 +266,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			forwardNotification(new GameStartResponse(board, gameDesc, pieces, turn));
 		} catch (IOException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -288,22 +274,35 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			log("Game has ended. The server is now waiting to host another game.");
 			forwardNotification(new GameOverResponse(board, state, winner));
-			numOfConnectedPlayers = 0;
-			this.clients = new ArrayList<Connection>();
+			stopGame();
+			
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
-		stop();
+	}
+
+	private void stopGame() {
+		gameOver = true;
+		if ( game.getState() == State.InPlay ) 
+			game.stop();
+		
+		for(Connection c : clients) {
+			try {
+				c.stop();
+			} catch (IOException e) {
+				// e.printStackTrace();
+			}
+		}
+		numOfConnectedPlayers = 0;
+		this.clients.clear();
 	}
 
 	public void onMoveStart(Board board, Piece turn) {
 		try {
 			forwardNotification(new MoveStartResponse(board, turn));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -311,8 +310,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			forwardNotification(new MoveEndResponse(board, turn, success));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -320,8 +318,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			forwardNotification(new ChangeTurnResponse(board, turn));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -329,8 +326,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			forwardNotification(new ErrorResponse(msg));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
