@@ -24,7 +24,6 @@ public class AtaxxSwingView extends RectBoardSwingView {
 	public AtaxxSwingView(Observable<GameObserver> g, Controller c, Piece localPiece, Player randPlayer,
 			Player aiPlayer) {
 		super(g, c, localPiece, randPlayer, aiPlayer);
-		// TODO Auto-generated constructor stub
 		isSecondSelection = false;
 		this.ctrl = c;
 		String title = "Ataxx";
@@ -35,7 +34,6 @@ public class AtaxxSwingView extends RectBoardSwingView {
 
 	@Override
 	public void selectedCoordinates(final int row, final int col) {
-		// TODO Auto-generated method stub
 		if (isSecondSelection) {
 			isSecondSelection = false;
 			try {

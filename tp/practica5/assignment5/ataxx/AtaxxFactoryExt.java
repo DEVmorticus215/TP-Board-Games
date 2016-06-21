@@ -1,5 +1,9 @@
 package es.ucm.fdi.tp.assignment5.ataxx;
 
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+
 import es.ucm.fdi.tp.assignment4.ataxx.AtaxxFactory;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
@@ -22,7 +26,18 @@ public class AtaxxFactoryExt extends AtaxxFactory{
     @Override
     public void createSwingView(Observable<GameObserver> game, Controller ctrl, Piece viewPiece, Player randPlayer,
             Player aiPlayer) {
-        new AtaxxSwingView(game, ctrl, viewPiece, randPlayer, aiPlayer);
+    	try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                	new AtaxxSwingView(game, ctrl, viewPiece, randPlayer, aiPlayer);
+                }
+                
+            });
+        } catch (InvocationTargetException e) {
+        } catch (InterruptedException e) {
+        }
     }
     
 }

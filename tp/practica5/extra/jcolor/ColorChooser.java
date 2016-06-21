@@ -58,6 +58,7 @@ public class ColorChooser extends JDialog {
 		getContentPane().add(buttonPane, BorderLayout.PAGE_END);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
