@@ -64,6 +64,10 @@ public class AtaxxRules implements GameRules {
 	public Board createBoard(List<Piece> pieces) {
 		Board board = new FiniteRectBoard(dim, dim);
 
+		for (int i = 0; i < pieces.size(); i++) {
+			board.setPieceCount(pieces.get(i), 2);
+		}
+
 		// Creates initial pieces up to 4 players:
 		for (int i = 0; i < pieces.size(); i++) {
 			if (i == 0) {
@@ -116,7 +120,7 @@ public class AtaxxRules implements GameRules {
 	public Piece initialPlayer(Board board, List<Piece> playersPieces) {
 		// Checks the first in the list that can play (that means, that can
 		// execute a valid move):
-		
+
 		Piece lastPlayer = playersPieces.get(playersPieces.size() - 1);
 
 		return nextPlayer(board, playersPieces, lastPlayer);
@@ -134,48 +138,86 @@ public class AtaxxRules implements GameRules {
 
 	@Override
 	public Pair<State, Piece> updateState(Board board, List<Piece> pieces, Piece turn) {
-		// Keeps as winner the player with the highest number of pieces located
-		// in the board:
-		Piece winner = null;
-		int numWinner = 0;
+		// int index = pieces.indexOf(turn);
+		// Piece lastPlayer = pieces.get((index + pieces.size() - 1) %
+		// pieces.size());
+		int n = pieces.size();
 
-		// Counts the number of players that still can execute a valid move in
-		// the board:
-		int numRemainingPlayers = pieces.size() - 1;
+		// Checks if there are at least one valid move remaining (we have to
+		// take into account that a player wins if there are remaining only
+		// pieces of his type in the board or if his opponents cannot make
+		// any valid moves, i.e., due to obstacles)
+		for (Piece p : pieces) {
+			if (validMoves(board, pieces, p).isEmpty()) {
+				n--;
+			}
+		}
 
-		for (int n = 0; n < pieces.size(); n++) {
-			Piece p = pieces.get(n);
-			int numP = 0;
+		if (board.isFull()) {
+			// Keeps as winner the player with the highest number of pieces
+			// located in the board:
+			Piece winner = null;
+			int numWinner = 0;
 
-			// Checks if there are at least one valid move remaining (we have to
-			// take into account that a player wins if there are remaining only
-			// pieces of his type in the board or if his opponents cannot make
-			// any valid moves, i.e., due to obstacles):
-			List<GameMove> availableMoves = validMoves(board, pieces, p);
+			State s = State.Draw;
+			for (int m = 0; m < pieces.size(); m++) {
+				Piece p = pieces.get(m);
+				int numP = 0;
 
-			// Counts the number of pieces of p located in the board:
+				// Counts the number of pieces of p located in the board:
+				for (int i = 0; i < dim; i++) {
+					for (int j = 0; j < dim; j++) {
+						if (board.getPosition(i, j) == p) {
+							numP++;
+						}
+					}
+				}
+
+				// Keeps as winner the piece p with the highest number of pieces
+				// located in the board:
+				if (numP > numWinner) {
+					winner = p;
+					numWinner = numP;
+					s = State.Won;
+				} else if (numP == numWinner) {
+					winner = null;
+					s = State.Draw;
+				}
+			}
+
+			return new Pair<State, Piece>(s, winner);
+		} else if (n == 1) {
+			for (Piece p : pieces) {
+				if (!validMoves(board, pieces, p).isEmpty()) {
+					return new Pair<State, Piece>(State.Won, p);
+				}
+			}
+			return gameInPlayResult;
+		} else {
+			// If there is only one player left or other players cannot make any
+			// valid moves, the game stops automatically and return the player
+			// left as the winner
+			Piece winner = null;
+			boolean onePlayerLeft = true;
+
 			for (int i = 0; i < dim; i++) {
 				for (int j = 0; j < dim; j++) {
-					if (board.getPosition(i, j) == p) {
-						numP++;
+					if (board.getPosition(i, j) != null) {
+						if (winner == null) {
+							winner = board.getPosition(i, j);
+						}
+
+						if (!board.getPosition(i, j).equals(winner)) {
+							onePlayerLeft = false;
+						}
 					}
 				}
 			}
 
-			// If the player cannot make a valid moves, he cannot play anymore:
-			if (availableMoves.isEmpty()) {
-				numRemainingPlayers--;
-			} else if (numP > numWinner) {
-				winner = p;
-				numWinner = numP;
-			} else if (numP == numWinner && board.isFull()) {
-				return new Pair<State, Piece>(State.Draw, null);
+			if (onePlayerLeft) {
+				return new Pair<State, Piece>(State.Won, winner);
 			}
-		}
 
-		if (numRemainingPlayers == 0) {
-			return new Pair<State, Piece>(State.Won, winner);
-		} else {
 			return gameInPlayResult;
 		}
 	}
@@ -188,33 +230,27 @@ public class AtaxxRules implements GameRules {
 		// returns null.
 
 		int cont = playersPieces.size();
-
-		List<Piece> pieces = playersPieces;
-		int i = pieces.indexOf(lastPlayer);
-		Piece nextPlayer = pieces.get((i + 1) % pieces.size());
+		int i = playersPieces.indexOf(lastPlayer);
+		Piece nextPlayer = playersPieces.get((i + 1) % playersPieces.size());
 
 		List<GameMove> availableMoves = validMoves(board, playersPieces, nextPlayer);
 
 		while (availableMoves.isEmpty()) {
 			lastPlayer = nextPlayer;
 
-			i = pieces.indexOf(lastPlayer);
-			nextPlayer = pieces.get((i + 1) % pieces.size());
+			i = playersPieces.indexOf(lastPlayer);
+			nextPlayer = playersPieces.get((i + 1) % playersPieces.size());
 
 			availableMoves = validMoves(board, playersPieces, nextPlayer);
 			cont--;
+
+			if (cont == 1) {
+				return null;
+			}
 		}
 
-		if (cont == 0) {
-			return null;
-		} else {
-			return nextPlayer;
-		}
-	}
+		return nextPlayer;
 
-	@Override
-	public double evaluate(Board board, List<Piece> pieces, Piece turn) {
-		return 0;
 	}
 
 	@Override
@@ -240,7 +276,7 @@ public class AtaxxRules implements GameRules {
 									int d = Math.max(Math.abs(i - k), Math.abs(j - l));
 
 									// Checks if the movement is in vertical,
-									// horizontal or strictly diagonal:
+									// horizontal or diagonal:
 									if (d == 1 || d == 2) {
 										moves.add(new AtaxxMove(i, j, k, l, turn));
 									}
@@ -266,4 +302,8 @@ public class AtaxxRules implements GameRules {
 		return obs;
 	}
 
+	@Override
+	public double evaluate(Board board, List<Piece> pieces, Piece turn) {
+		return 0;
+	}
 }

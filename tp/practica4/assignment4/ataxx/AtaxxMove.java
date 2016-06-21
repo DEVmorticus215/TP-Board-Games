@@ -80,7 +80,7 @@ public class AtaxxMove extends GameMove {
 		int d = Math.max(Math.abs(originRow - finalRow), Math.abs(originCol - finalCol));
 
 		// Checks if the piece we want to move belongs to the current player:
-		if (board.getPosition(originRow, originCol).equals(getPiece())) {
+		if (getPiece().equals(board.getPosition(originRow, originCol))) {
 			// Checks if the final position where we want to move the piece does
 			// exist:
 			if (finalRow >= 0 && finalCol >= 0 && finalRow < board.getRows() && finalCol < board.getCols()) {
@@ -96,17 +96,20 @@ public class AtaxxMove extends GameMove {
 					} else if (d == 1) {
 						// Moves the piece if the distance is 1:
 						board.setPosition(finalRow, finalCol, getPiece());
+						board.setPieceCount(getPiece(), board.getPieceCount(getPiece()) + 1);
 					} else {
 						throw new GameError("Piece cannot move further than 2 spaces!");
 					}
+				} else if (board.getPosition(finalRow, finalCol) != null) {
+					throw new GameError("Position (" + finalRow + "," + finalCol + ") is already occupied!");
+				} else {
+					throw new GameError("Please, select a valid destination cell.");
 				}
-			} else {
-				throw new GameError("Piece at position (" + originRow + "," + originCol + ") is not yours!");
 			}
-		} else if (board.getPosition(finalRow, finalCol) != null) {
-			throw new GameError("Position (" + finalRow + "," + finalCol + ") is already occupied!");
 		} else if (board.getPosition(originRow, originCol) == null) {
 			throw new GameError("There is no piece at position (" + originRow + "," + originCol + ")!");
+		} else {
+			throw new GameError("Piece at position (" + originRow + "," + originCol + ") is not yours!");
 		}
 
 		// To check that a piece is an obstacle from outside we simply check
@@ -116,7 +119,9 @@ public class AtaxxMove extends GameMove {
 			for (int j = finalCol - 1; j <= finalCol + 1; j++) {
 				if (i >= 0 && j >= 0 && i < board.getRows() && j < board.getCols()) {
 					if (board.getPosition(i, j) != null && !isObstacle(board, pieces, i, j)) {
+						board.setPieceCount(board.getPosition(i, j), board.getPieceCount(board.getPosition(i, j)) - 1);
 						board.setPosition(i, j, getPiece());
+						board.setPieceCount(getPiece(), board.getPieceCount(getPiece()) + 1);
 					}
 				}
 			}

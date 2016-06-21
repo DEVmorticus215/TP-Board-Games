@@ -1,4 +1,4 @@
-package es.ucm.fdi.tp.assignment4.ataxx;
+package es.ucm.fdi.tp.assignment4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import es.ucm.fdi.tp.assignment4.ataxx.AtaxxFactory;
 import es.ucm.fdi.tp.basecode.attt.AdvancedTTTFactory;
 import es.ucm.fdi.tp.basecode.bgame.control.ConsoleCtrl;
 import es.ucm.fdi.tp.basecode.bgame.control.ConsoleCtrlMVC;
